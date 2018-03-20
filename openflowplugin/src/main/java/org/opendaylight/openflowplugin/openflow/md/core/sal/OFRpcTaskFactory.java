@@ -32,9 +32,11 @@ import org.opendaylight.openflowplugin.openflow.md.core.sal.convertor.GroupConve
 import org.opendaylight.openflowplugin.openflow.md.core.sal.convertor.MeterConvertor;
 import org.opendaylight.openflowplugin.openflow.md.core.sal.convertor.PortConvertor;
 import org.opendaylight.openflowplugin.openflow.md.core.sal.convertor.TableFeaturesConvertor;
+import org.opendaylight.openflowplugin.openflow.md.core.sal.convertor.ExperimenterConvertor;
 import org.opendaylight.openflowplugin.openflow.md.core.sal.convertor.match.MatchReactor;
 import org.opendaylight.openflowplugin.openflow.md.util.FlowCreatorUtil;
 import org.opendaylight.openflowplugin.openflow.md.util.InventoryDataServiceUtil;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.experimenter.message.service.rev151020.SendExperimenterInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.FlowHashIdMapping;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.nodes.node.table.FlowHashIdMap;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.inventory.rev130819.nodes.node.table.FlowHashIdMapKey;
@@ -130,6 +132,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.openflow.common.types.rev13
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflow.common.types.rev130731.MultipartRequestFlags;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflow.common.types.rev130731.MultipartType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflow.common.types.rev130731.SwitchConfigFlag;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.openflow.protocol.rev130731.ExperimenterInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflow.protocol.rev130731.FlowModInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflow.protocol.rev130731.GroupModInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.openflow.protocol.rev130731.MeterModInputBuilder;
@@ -196,6 +199,31 @@ public abstract class OFRpcTaskFactory {
     private OFRpcTaskFactory() {
         // hiding implicit constructor
     }
+
+    // Experimenter Extension
+    public static OFRpcTask<SendExperimenterInput, RpcResult<Void>> createSendExperimenterTask(OFRpcTaskContext taskContext,
+                                                                                               final SendExperimenterInput input, final SwitchConnectionDistinguisher cookie) {
+        class OFRpcTaskImpl extends OFRpcTask<SendExperimenterInput, RpcResult<Void>> {
+
+            public OFRpcTaskImpl(OFRpcTaskContext taskContext, SwitchConnectionDistinguisher cookie, SendExperimenterInput input) {
+                super(taskContext, cookie, input);
+            }
+
+            @Override
+            public ListenableFuture<RpcResult<Void>> call() throws Exception {
+                ListenableFuture<RpcResult<Void>> result = SettableFuture.create();
+                ExperimenterInputBuilder experimenterInputBuilder = ExperimenterConvertor.toExperimenterInput(input, getVersion());
+                final Long xId = getSession().getNextXid();
+                experimenterInputBuilder.setXid(xId);
+                Future<RpcResult<Void>> resultFromOFLib = getMessageService().experimenter(experimenterInputBuilder.build(), cookie);
+                result = JdkFutureAdapters.listenInPoolThread(resultFromOFLib);
+                return result;
+            }
+        }
+
+        return new OFRpcTaskImpl(taskContext, cookie, input);
+    }
+
 
     /**
      * @param taskContext task context

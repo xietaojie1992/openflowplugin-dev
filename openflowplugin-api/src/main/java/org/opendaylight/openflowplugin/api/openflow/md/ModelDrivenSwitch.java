@@ -10,6 +10,7 @@ package org.opendaylight.openflowplugin.api.openflow.md;
 import com.google.common.base.Optional;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.openflowplugin.api.openflow.md.core.session.SessionContext;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.experimenter.message.service.rev151020.SalExperimenterMessageService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService;
@@ -35,7 +36,7 @@ import java.math.BigInteger;
  * interface concatenating all md-sal services provided by OF-switch
  */
 public interface ModelDrivenSwitch
-        extends
+        extends SalExperimenterMessageService,
         SalGroupService,
         SalFlowService,
         SalMeterService, SalTableService, SalPortService, PacketProcessingService, NodeConfigService,

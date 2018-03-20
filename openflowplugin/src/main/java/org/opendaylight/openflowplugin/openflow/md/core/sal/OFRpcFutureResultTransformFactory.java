@@ -39,6 +39,15 @@ public abstract class OFRpcFutureResultTransformFactory {
     protected static final Logger LOG = LoggerFactory
             .getLogger(OFRpcFutureResultTransformFactory.class);
 
+    public static Function<RpcResult<Void>, RpcResult<Void>> createSendExperimenterOutput() {
+        return new Function<RpcResult<Void>, RpcResult<Void>>() {
+            @Override
+            public RpcResult<Void> apply( RpcResult<Void> input) {
+                return Rpcs.getRpcResult(true);
+            }
+        };
+    }
+
     /**
      *
      * @param input rpc result input

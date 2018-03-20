@@ -11,6 +11,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker.RoutedRpcR
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.openflowplugin.api.openflow.md.ModelDrivenSwitch;
 import org.opendaylight.openflowplugin.api.openflow.md.core.session.SessionContext;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.experimenter.message.service.rev151020.SalExperimenterMessageService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.service.rev130819.SalFlowService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.statistics.rev130819.OpendaylightFlowStatisticsService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.flow.table.statistics.rev131215.OpendaylightFlowTableStatisticsService;
@@ -55,6 +56,10 @@ public abstract class AbstractModelDrivenSwitch implements ModelDrivenSwitch {
     public CompositeObjectRegistration<ModelDrivenSwitch> register(RpcProviderRegistry rpcProviderRegistry) {
         CompositeObjectRegistrationBuilder<ModelDrivenSwitch> builder = CompositeObjectRegistration
                 .<ModelDrivenSwitch> builderFor(this);
+
+        final RoutedRpcRegistration<SalExperimenterMessageService> experimenterRegistration = rpcProviderRegistry.addRoutedRpcImplementation(SalExperimenterMessageService.class, this);
+        experimenterRegistration.registerPath(NodeContext.class, getIdentifier());
+        builder.add(experimenterRegistration);
 
         final RoutedRpcRegistration<SalFlowService> flowRegistration = rpcProviderRegistry.addRoutedRpcImplementation(SalFlowService.class, this);
         flowRegistration.registerPath(NodeContext.class, getIdentifier());
